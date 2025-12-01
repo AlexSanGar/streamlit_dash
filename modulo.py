@@ -39,27 +39,37 @@ except Exception:
 # -------------------------------------------------------------
 # FUNCIÓN DE FILTRADO
 # -------------------------------------------------------------
-def filtrar_smallcaps(df):
-    """Filtrado principal conservando la lógica original."""
-    start = pd.to_datetime("2022-01-01")
-    end = pd.to_datetime("2025-11-30")
-    filtro_tiempo = (df["Date"] >= start) & (df["Date"] <= end)
+def filtrar_smallcaps(df): 
+    start = pd.to_datetime("2022-01-01") 
+    end = pd.to_datetime("2025-11-30") 
+    filtro_tiempo = (df["Date"] >= start) & (df["Date"] <= end) 
 
-    # Usamos .astype(float) por si hay strings
-    filtro_no_buyouts = pd.to_numeric(df.get("RTH Range %", 0), errors="coerce") > 0.1
-    filtro_smallcaps = pd.to_numeric(df.get("Open Price", 0), errors="coerce") < 12
-    filtro_liquidez = pd.to_numeric(df.get("Premarket Volume", 0), errors="coerce") > 1_000_000
-    filtro_gap = (pd.to_numeric(df.get("Open Gap %", 0), errors="coerce") > 0.5) & (
-        pd.to_numeric(df.get("Open Gap %", 0), errors="coerce") < 8
-    )
-    filtro_previous_day = pd.to_numeric(df.get("Previous Day Close Price", 0), errors="coerce") > 0.1
+    filtro_no_buyouts = pd.to_numeric(df.get("RTH Range %", 0), errors="coerce") > 0.1 
+    filtro_smallcaps = pd.to_numeric(df.get("Open Price", 0), errors="coerce") < 12 
+    filtro_liquidez = pd.to_numeric(df.get("Premarket Volume", 0), errors="coerce") > 1_000_000 
+    filtro_gap = (pd.to_numeric(df.get("Open Gap %", 0), errors="coerce") > 0.5) & ( pd.to_numeric(df.get("Open Gap %", 0), errors="coerce") < 8 ) 
+    filtro_previous_day = pd.to_numeric(df.get("Previous Day Close Price", 0), errors="coerce") > 0.1 
 
-    filtros = filtro_tiempo & filtro_no_buyouts & filtro_smallcaps & filtro_liquidez & filtro_gap & filtro_previous_day
+    #filtro_premarket = pd.to_numeric(df.get("PMH Gap %", 0), errors="coerce") > 0.5
+    #filtro_return = pd.to_numeric(df.get("Day Return %", 0), errors="coerce") < 0
+    #pm_time = pd.to_datetime(df.get("PM High Time"), format="%H:%M", errors="coerce") 
+    #filtro_hora = (pm_time >= pd.to_datetime("07:00")) & (pm_time <= pd.to_datetime("09:00"))
 
+    filtros = (
+        filtro_tiempo & 
+        filtro_no_buyouts & 
+        filtro_smallcaps & 
+        filtro_liquidez & 
+        filtro_gap & 
+        #filtro_premarket &
+        #filtro_return &
+        #filtro_hora &
+        filtro_previous_day
+        )
+    
     return df.loc[filtros].copy()
 
 
-# Generamos stocks_filtrados una sola vez
 stocks_filtrados = filtrar_smallcaps(stocks_v1)
 
 # -------------------------------------------------------------
@@ -343,7 +353,7 @@ monthly_rth_fade["YearMonth"] = monthly_rth_fade["YearMonth_dt"].dt.strftime("%Y
 # -------------------------------------------------------------
 
 def grafico_gappers():
-    fig = px.bar(monthly_counts,x="YearMonth",y="Stocks",title="Gaps / mes",
+    fig = px.bar(monthly_counts,x="YearMonth",y="Stocks",title="   Gaps / mes",
                  labels={"YearMonth":"Mes","Stocks":"Gaps"},template="plotly_dark")
     fig.add_scatter(x=monthly_counts["YearMonth"], y=monthly_counts["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -351,7 +361,7 @@ def grafico_gappers():
     return fig
 
 def grafico_volumen():
-    fig = px.bar(monthly_volume,x="YearMonth",y="EOD Volume",title="Volumen total",
+    fig = px.bar(monthly_volume,x="YearMonth",y="EOD Volume",title="   Volumen total",
                  labels={"YearMonth":"Mes"},template="plotly_dark")
     fig.add_scatter(x=monthly_volume["YearMonth"], y=monthly_volume["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -359,7 +369,7 @@ def grafico_volumen():
     return fig
 
 def grafico_gap():
-    fig = px.bar(monthly_gap_open,x="YearMonth",y="Gap (%)",title="Gap Value %",
+    fig = px.bar(monthly_gap_open,x="YearMonth",y="Gap (%)",title="   Gap Value %",
                  labels={"YearMonth":"Mes","Gap (%)":"Gap (%)"},template="plotly_dark")
     fig.add_scatter(x=monthly_gap_open["YearMonth"], y=monthly_gap_open["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -367,7 +377,7 @@ def grafico_gap():
     return fig
 
 def grafico_highspike():
-    fig = px.bar(monthly_highspike,x="YearMonth",y="High Spike (%)",title="High Spike %",
+    fig = px.bar(monthly_highspike,x="YearMonth",y="High Spike (%)",title="   High Spike %",
                  labels={"YearMonth":"Mes"},template="plotly_dark")
     fig.add_scatter(x=monthly_highspike["YearMonth"], y=monthly_highspike["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -375,7 +385,7 @@ def grafico_highspike():
     return fig
 
 def grafico_lowspike():
-    fig = px.bar(monthly_lowspike,x="YearMonth",y="Low Spike (%)",title="Low Spike %",
+    fig = px.bar(monthly_lowspike,x="YearMonth",y="Low Spike (%)",title="   Low Spike %",
                  labels={"YearMonth":"Mes"},template="plotly_dark")
     fig.add_scatter(x=monthly_lowspike["YearMonth"], y=monthly_lowspike["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -383,7 +393,7 @@ def grafico_lowspike():
     return fig
 
 def grafico_range():
-    fig = px.bar(monthly_range,x="YearMonth",y="Range (%)",title="RTH Range %",
+    fig = px.bar(monthly_range,x="YearMonth",y="Range (%)",title="   RTH Range %",
                  labels={"YearMonth":"Mes"},template="plotly_dark")
     fig.add_scatter(x=monthly_range["YearMonth"], y=monthly_range["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -391,7 +401,7 @@ def grafico_range():
     return fig
 
 def grafico_closered():
-    fig = px.bar(monthly_closered,x="YearMonth",y="Close Red (%)",title="Close Red %",
+    fig = px.bar(monthly_closered,x="YearMonth",y="Close Red (%)",title="   Close Red %",
                  labels={"YearMonth":"Mes"},template="plotly_dark")
     fig.add_scatter(x=monthly_closered["YearMonth"], y=monthly_closered["SMA_6"],
                     mode="lines", name="SMA", line=dict(width=3,color="#ff9933"))
@@ -508,7 +518,7 @@ fig_4 = px.bar(
     monthly_return,
     x="YearMonth",
     y="Return (%)",
-    title="Return gaps/mes",
+    title="   Return gaps/mes",
     labels={"YearMonth": "Mes", "Return (%)": "Retorno promedio (%)"},
     template="plotly_dark",
 )
@@ -627,14 +637,14 @@ def grafico_return_distribution():
     df = stocks_filtrados.copy()
     df["Return_pct"] = df["Day Return %"] * 100
     bins = [-100, -80, -60, -40, -20, 0, 20, 40, 60, 80, 100, 9999]
-    labels = ["-100% - -80%", "-80% - -60%", "-60% - -40%", "-40% - -20%", "-20% - 0%", "0% - 20%", "20% - 40%", "40% - 60%", "60% - 80%", "80% - 100%", ">100%"]
+    labels = ["-100% a -80%", "-80% a -60%", "-60% a -40%", "-40% a -20%", "-20% a 0%", "0% a 20%", "20% a 40%", "40% a 60%", "60% a 80%", "80% a 100%", ">100%"]
     df["Return_bin"] = pd.cut(df["Return_pct"], bins=bins, labels=labels, include_lowest=True)
     distrib = df["Return_bin"].value_counts().reindex(labels).reset_index()
     distrib.columns = ["Rango", "Acciones"]
 
     fig = px.bar(distrib, x="Acciones", y="Rango", orientation="h", labels={"Acciones": "Gaps", "Rango": ""}, title="RETURN DISTRIBUTION", template="plotly_dark")
     fig.update_traces(marker_color="#69b3ff")
-    fig.update_layout(height=450, margin=dict(l=80, r=30, t=70, b=40), title=dict(x=0.5), yaxis=dict(categoryorder="array", categoryarray=labels))
+    fig.update_layout(height=450, margin=dict(l=80, r=30, t=70, b=40), title=dict(x=0.5, xanchor="center"), yaxis=dict(categoryorder="array", categoryarray=labels))
     return fig
 
 
@@ -793,7 +803,7 @@ def grafico_intradia():
                 line_pos = col_idx * col_width
                 fig.add_shape(type="line", xref="paper", yref="paper", x0=line_pos, y0=0.0, x1=line_pos, y1=1.0, line=dict(color="white", width=0.1, dash="dot"))
 
-    fig.update_layout(template="plotly_dark", title="AVG CHANGE FROM OPEN", height=500, legend=dict(orientation="h", yanchor="bottom", y=1.1, xanchor="right", x=1), margin=dict(l=40, r=20, t=100, b=60))
+    fig.update_layout(template="plotly_dark", title="     AVG CHANGE FROM OPEN", height=500, legend=dict(orientation="h", yanchor="bottom", y=1.1, xanchor="right", x=1), margin=dict(l=40, r=20, t=100, b=60))
     fig.update_yaxes(ticksuffix="%")
     return fig
 
@@ -812,7 +822,7 @@ def grafico_multiframe_returns():
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=valores, y=labels, orientation="h", marker=dict(color=colores), textposition="outside"))
-    fig.update_layout(template="plotly_dark", title="Multi-Timeframe Return %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
+    fig.update_layout(template="plotly_dark", title="   Multi-Timeframe Return %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
     return fig
 
 
@@ -827,7 +837,7 @@ def grafico_multiframe_highspike():
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=valores, y=labels, orientation="h", marker=dict(color=colores), textposition="outside"))
-    fig.update_layout(template="plotly_dark", title="Multi-Timeframe High Spike %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
+    fig.update_layout(template="plotly_dark", title="   Multi-Timeframe High Spike %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
     return fig
 
 
@@ -842,7 +852,7 @@ def grafico_multiframe_lowspike():
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=valores, y=labels, orientation="h", marker=dict(color=colores), textposition="outside"))
-    fig.update_layout(template="plotly_dark", title="Multi-Timeframe Low Spike %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
+    fig.update_layout(template="plotly_dark", title="   Multi-Timeframe Low Spike %", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
     return fig
 
 
@@ -869,7 +879,7 @@ def grafico_gaps_por_ano():
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=conteo["Year"], y=conteo["Gaps"], marker=dict(color="#00cc96")))
-    fig.update_layout(template="plotly_dark", title="Number of Gaps by Year", height=450, margin=dict(l=40, r=20, t=60, b=40))
+    fig.update_layout(template="plotly_dark", title="   Number of Gaps by Year", height=450, margin=dict(l=40, r=20, t=60, b=40))
     return fig
 
 
@@ -884,7 +894,7 @@ def grafico_multiframe_return_to_close():
 
     fig = go.Figure()
     fig.add_trace(go.Bar(x=valores, y=labels, orientation="h", marker=dict(color=colores), textposition="outside"))
-    fig.update_layout(template="plotly_dark", title="Multi-Timeframe Return % to close", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
+    fig.update_layout(template="plotly_dark", title="   Multi-Timeframe Return % to close", height=450, xaxis=dict(ticksuffix="%"), margin=dict(l=60, r=20, t=60, b=20))
     return fig
 
 
@@ -907,7 +917,7 @@ def grafico_multiframe_vwap_distance():
     colores = ["#00cc96" if v >= 0 else "#ef553b" for v in distancias]
     fig = go.Figure()
     fig.add_trace(go.Bar(x=distancias, y=labels, orientation="h", marker=dict(color=colores), textposition="outside"))
-    fig.update_layout(template="plotly_dark", title="Distance VWAP from Price %", height=450, xaxis=dict(title="", ticksuffix="%"), margin=dict(l=70, r=40, t=60, b=40))
+    fig.update_layout(template="plotly_dark", title="   Distance VWAP from Price %", height=450, xaxis=dict(title="", ticksuffix="%"), margin=dict(l=70, r=40, t=60, b=40))
     return fig
 
 
@@ -970,28 +980,28 @@ def grafico_pmh_fade_distribution():
 def grafico_pmh_gap_value():
     fig = px.bar(monthly_pmh_gap, x="YearMonth", y="Gap (%)", title="PMH Gap Value %", labels={"YearMonth": "Mes", "Gap (%)": "Gap medio (%)"}, template="plotly_dark")
     fig.add_scatter(x=monthly_pmh_gap["YearMonth"], y=monthly_pmh_gap["SMA_6"], mode="lines", name="SMA 6 meses", line=dict(color="#ff9933", width=3))
-    fig.update_layout(xaxis_tickangle=90, height=450, coloraxis_showscale=False)
+    fig.update_layout(xaxis_tickangle=90, height=450, coloraxis_showscale=False, title=dict(x=0.5, xanchor="center"))
     return fig
 
 
 def grafico_pmh_fade_value():
     fig = px.bar(monthly_fade, x="YearMonth", y="Fade (%)", title="PMH Fade to Open %", labels={"YearMonth": "Mes", "Fade (%)": "Fade medio (%)"}, template="plotly_dark")
     fig.add_scatter(x=monthly_fade["YearMonth"], y=monthly_fade["SMA_6"], mode="lines", name="SMA 6M", line=dict(color="#ffaa00", width=3))
-    fig.update_layout(xaxis_tickangle=90, height=450, margin=dict(l=40, r=20, t=60, b=50))
+    fig.update_layout(xaxis_tickangle=90, height=450, margin=dict(l=40, r=20, t=60, b=50),title=dict(x=0.5, xanchor="center"))
     return fig
 
 
 def grafico_pmh_volume_mes():
     fig = px.bar(monthly_pmv, x="YearMonth", y="PMH_Volume_Total", title="Total Premarket Volume", labels={"YearMonth": "Mes", "PMH_Volume_Total": ""}, template="plotly_dark")
     fig.add_scatter(x=monthly_pmv["YearMonth"], y=monthly_pmv["SMA_6"], mode="lines", name="SMA 6 meses", line=dict(color="#ff9933", width=3))
-    fig.update_layout(height=450, xaxis_tickangle=90, margin=dict(l=40, r=20, t=60, b=40))
+    fig.update_layout(height=450, xaxis_tickangle=90, margin=dict(l=40, r=20, t=60, b=40), title=dict(x=0.5, xanchor="center"))
     return fig
 
 
 def grafico_rth_fade_to_close_mes():
-    fig = px.bar(monthly_rth_fade, x="YearMonth", y="Fade (%)", title="RTH Fade to Close", labels={"YearMonth": "Mes", "Fade (%)": "Fade medio (%)"}, template="plotly_dark")
+    fig = px.bar(monthly_rth_fade, x="YearMonth", y="Fade (%)", title="   RTH Fade to Close", labels={"YearMonth": "Mes", "Fade (%)": "Fade medio (%)"}, template="plotly_dark")
     fig.add_scatter(x=monthly_rth_fade["YearMonth"], y=monthly_rth_fade["SMA_6"], mode="lines", name="SMA 6", line=dict(color="#ff9933", width=3))
-    fig.update_layout(height=450, xaxis_tickangle=90, margin=dict(l=40, r=20, t=60, b=40), title=dict(x=0.5, xanchor="center"))
+    fig.update_layout(height=450, xaxis_tickangle=90, margin=dict(l=40, r=20, t=60, b=40))
     return fig
 
 def grafico_premarket():
@@ -1099,7 +1109,7 @@ def grafico_premarket():
 
     fig.update_layout(
         template="plotly_dark",
-        title="AVG CHANGE FROM OPEN — PRE-MARKET",
+        title="     AVG CHANGE FROM OPEN — PRE-MARKET",
         height=500,
         legend=dict(orientation="h", yanchor="bottom", y=1.1, xanchor="right", x=1),
         margin=dict(l=40, r=20, t=100, b=60)

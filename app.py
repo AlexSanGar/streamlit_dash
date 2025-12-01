@@ -45,7 +45,7 @@ with col2:
 st.markdown("---")
 
 # ---------------------------------------------------------
-# 📅 GAPS / MES + RETURN — Selector funcional
+# GAPS / MES + RETURN — Selector funcional
 # ---------------------------------------------------------
 
 col_left, col_right = st.columns([1.2, 2])
